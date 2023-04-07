@@ -1,0 +1,22 @@
+[project]
+name = "ntlog"
+version = "0.0"
+description = "Append a log file to an running NestedText log"
+keywords = ["nestedtext", "logging"]
+authors = [
+    {name = "Ken Kundert"},
+]
+requires-python = ">=3.6"
+dependencies = [
+    "arrow>=0.15",
+    "docopt",
+    "inform>=1.28",
+    "nestedtext",
+]
+
+[project.scripts]
+ntlog = "main:main"
+
+[build-system]
+requires = ["flit_core >=2,<4"]
+build-backend = "flit_core.buildapi"
