@@ -33,9 +33,11 @@ can add the most recently generated log file to a running log that will not be
 overwritten.
 
 Usage::
+
     ntlog [options] <logfile>
 
 Options::
+
     -k, --keep-for [days]    drop entries older than this [default: 7]
     -n, --max-entries [N]    maximum number of log entries to keep
     -N, --min-entries [N]    minimum number of log entries to keep [default: 1]
