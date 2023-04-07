@@ -14,15 +14,25 @@ dependencies = [
     "inform>=1.28",
     "nestedtext",
 ]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    # "Development Status :: 5 - Production/Stable",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: GNU General Public License v3 or later (GPLv3+)",
+    "Natural Language :: English",
+    "Operating System :: POSIX :: Linux",
+    "Programming Language :: Python :: 3",
+    "Topic :: Utilities",
+]
+
+[project.scripts]
+ntlog = "ntlog:main.main"
 
 [project.urls]
 homepage = "https://github.com/kenkundert/ntlog"
 documentation = "https://github.com/KenKundert/ntlog/blob/master/README.rst"
 repository = "https://github.com/kenkundert/ntlog"
 changelog = "https://github.com/KenKundert/ntlog/blob/master/CHANGELOG.rst"
-
-[project.scripts]
-ntlog = "ntlog:main.main"
 
 [build-system]
 requires = ["flit_core >=2,<4"]
