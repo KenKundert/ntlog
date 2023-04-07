@@ -34,17 +34,17 @@ overwritten.
 
 ::
 
-Usage:
+    Usage:
 
-    ntlog [options] <logfile>
+        ntlog [options] <logfile>
 
-Options:
+    Options:
 
-    -k, --keep-for [days]    drop entries older than this [default: 7]
-    -n, --max-entries [N]    maximum number of log entries to keep
-    -N, --min-entries [N]    minimum number of log entries to keep [default: 1]
-    -d, --delete             delete given logfile after incorporating it
-    -h, --help               print this usage message
+        -k, --keep-for [days]    drop entries older than this [default: 7]
+        -n, --max-entries [N]    maximum number of log entries to keep
+        -N, --min-entries [N]    minimum number of log entries to keep [default: 1]
+        -d, --delete             delete given logfile after incorporating it
+        -h, --help               print this usage message
 
 When run, *ntLog* copies the contents of ``<logfile>`` into ``<logfile>.nt``.
 Any log entries that are older than ``--keep-for`` days are deleted.  If the 
