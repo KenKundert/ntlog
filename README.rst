@@ -32,11 +32,13 @@ a existing log file will be overwritten on the next run.  By using *ntLog* you
 can add the most recently generated log file to a running log that will not be 
 overwritten.
 
-Usage::
+::
+
+Usage:
 
     ntlog [options] <logfile>
 
-Options::
+Options:
 
     -k, --keep-for [days]    drop entries older than this [default: 7]
     -n, --max-entries [N]    maximum number of log entries to keep
