@@ -3,17 +3,24 @@ from shlib import Run
 import nestedtext as nt
 import arrow
 import os
+import re
 
 now = arrow.now()
 
-def create_logfile(age):
+def create_logfile(age, extra=''):
     path = Path('test.log')
-    path.write_text(f"entry written = {age} days ago.")
-    mtime = now.shift(days=-age)
+    path.write_text(f"entry written = {age} days ago.{extra}")
+    mtime = now.shift(days=-age, seconds=-600)
     os.utime(str(path), (mtime.timestamp(), mtime.timestamp()))
     return mtime
 
-def exercise_ntlog(keep_for=None, min_entries=None, max_entries=None, delete=None):
+def exercise_ntlog(
+    keep_for = None,
+    min_entries = None,
+    max_entries = None,
+    delete = None,
+    delete_running_log = True
+):
     cmd = ['./run-ntlog']
     if keep_for:
         cmd.extend(['--keep-for', str(keep_for)])
@@ -30,7 +37,8 @@ def exercise_ntlog(keep_for=None, min_entries=None, max_entries=None, delete=Non
     upper_bound = max(keep_for, min_entries, max_entries)
     if not max_entries:
         max_entries = 1000
-    Path('test.log.nt').unlink(missing_ok=True)
+    if delete_running_log:
+        Path('test.log.nt').unlink(missing_ok=True)
 
     mtimes = []
     for days in reversed(range(upper_bound + 7)):
@@ -62,6 +70,17 @@ def exercise_ntlog(keep_for=None, min_entries=None, max_entries=None, delete=Non
 def test_defaults():
     exercise_ntlog()
 
+    # now shrink keep_for and check that old entries are deleted
+    running_log = nt.load('test.log.nt')
+    mtimes = [arrow.get(k) for k in running_log]
+    expected_mtimes = [mtime for mtime in mtimes if (now - mtime).days < 3]
+
+    ntlog = Run(['./run-ntlog', '--keep-for', '3', 'test.log'], 'sOEW')
+    running_log = nt.load('test.log.nt')
+    mtimes = [arrow.get(k) for k in running_log.keys()]
+    assert len(mtimes) == len(expected_mtimes)
+    assert mtimes == expected_mtimes
+
 def test_delete():
     exercise_ntlog(delete=True)
 
@@ -74,7 +93,43 @@ def test_min_entries():
 def test_max_entries():
     exercise_ntlog(max_entries=3)
 
-    #exercise_ntlog(keep_for=None, min_entries=None, max_entries=None, delete=None)
+def test_exceptions():
+    running_logfile = Path('test.log.nt')
 
-if __name__ == '__main__':
-    test_all()
+    running_logfile.unlink(missing_ok=True)
+    ntlog = Run(['./run-ntlog', 'does-not-exist'], 'sOEW1')
+    assert ntlog.status == 1
+    assert ntlog.stderr == 'run-ntlog error: does-not-exist: no such file or directory.\n'
+
+    running_logfile.unlink(missing_ok=True)
+    ntlog = Run(['./run-ntlog', '--max-entries', 'infinity', 'does-not-exist'], 'sOEW1')
+    assert ntlog.status == 1
+    assert ntlog.stderr == 'run-ntlog error: infinity: could not convert to number.\n'
+
+    running_logfile.unlink(missing_ok=True)
+    ntlog = Run(['./run-ntlog', '--min-entries', '0', 'does-not-exist'], 'sOEW1')
+    assert ntlog.status == 1
+    assert ntlog.stderr == 'run-ntlog error: 0: expected strictly positive number.\n'
+
+    # try to save a log file with same mtime but differing contents
+    running_logfile.unlink(missing_ok=True)
+    create_logfile(1)
+    ntlog = Run(['./run-ntlog', 'test.log'], 'sOEW1')
+    assert ntlog.status == 0
+    mtime = create_logfile(1, extra='\na difference')
+    ntlog = Run(['./run-ntlog', 'test.log'], 'sOEW1')
+    assert ntlog.status == 1
+    #assert re.match('run-ntlog error: [^ ]+: attempt to overwrite log entry.\n', ntlog.stderr)
+    assert ntlog.stderr == f'run-ntlog error: {mtime!s}: attempt to overwrite log entry.\n'
+
+    # attempt to read a running log file with a bogus datestamp
+    path = running_logfile.write_text("not a date: contents")
+    ntlog = Run(['./run-ntlog', 'test.log'], 'sOEW1')
+    assert ntlog.status == 1
+    assert "Expected an ISO 8601-like string, but was given 'not a date'." in ntlog.stderr
+
+    # attempt to read a bogus running log file
+    path = running_logfile.write_text("not a valid NT file")
+    ntlog = Run(['./run-ntlog', 'test.log'], 'sOEW1')
+    assert ntlog.status == 1
+    assert 'unrecognized line.' in ntlog.stderr

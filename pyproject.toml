@@ -15,7 +15,7 @@ dependencies = [
 ]
 
 [project.scripts]
-ntlog = "main:main"
+ntlog = "ntlog:main.main"
 
 [build-system]
 requires = ["flit_core >=2,<4"]

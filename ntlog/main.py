@@ -34,7 +34,7 @@ def to_int(number):
             number = int(number)
             if number > 0:
                 return number
-            fatal('expected positive number.', culprit=number)
+            fatal('expected strictly positive number.', culprit=number)
     except ValueError as e:
         fatal('could not convert to number.', culprit=number)
 
@@ -102,4 +102,4 @@ def main():
     except nt.NestedTextError as e:
         e.terminate()
     except arrow.ParserError as e:
-        fatal(full_stop(e), culprit=(running_logfile, k))
+        fatal(full_stop(e), wrap=True, culprit=running_logfile)
