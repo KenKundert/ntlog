@@ -7,8 +7,8 @@ ntLog — Append a file into an running NestedText log
 ..  image:: https://github.com/KenKundert/ntlog/actions/workflows/build.yaml/badge.svg
     :target: https://github.com/KenKundert/ntlog/actions/workflows/build.yaml
 
-.. image:: https://coveralls.io/repos/github/KenKundert/ntlog/badge.svg?branch=master
-    :target: https://coveralls.io/github/KenKundert/ntlog?branch=master
+.. image:: https://coveralls.io/repos/github/KenKundert/ntlog/badge.svg?branch=main
+    :target: https://coveralls.io/github/KenKundert/ntlog?branch=main
 
 .. image:: https://img.shields.io/pypi/v/ntlog.svg
     :target: https://pypi.python.org/pypi/ntlog
