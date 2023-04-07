@@ -1,9 +1,24 @@
 ntLog — Append a file into an running NestedText log
 ====================================================
 
+.. image:: https://pepy.tech/badge/ntlog/month
+    :target: https://pepy.tech/project/ntlog
+
+..  image:: https://github.com/KenKundert/ntlog/actions/workflows/build.yaml/badge.svg
+    :target: https://github.com/KenKundert/ntlog/actions/workflows/build.yaml
+
+.. image:: https://coveralls.io/repos/github/KenKundert/ntlog/badge.svg?branch=master
+    :target: https://coveralls.io/github/KenKundert/ntlog?branch=master
+
+.. image:: https://img.shields.io/pypi/v/ntlog.svg
+    :target: https://pypi.python.org/pypi/ntlog
+
+.. image:: https://img.shields.io/pypi/pyversions/ntlog.svg
+    :target: https://pypi.python.org/pypi/ntlog/
+
 :Author: Ken Kundert
 :Version: 0.0
-:Released: 2023-03-20
+:Released: 2023-04-07
 
 *ntLog* is a simple command line utility used to append discretely generated log 
 files into a running log formulated as a `NestedText <nestedtext.org>`_ file.  
