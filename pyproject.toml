@@ -15,6 +15,12 @@ dependencies = [
     "nestedtext",
 ]
 
+[project.urls]
+homepage = "https://github.com/kenkundert/ntlog"
+documentation = "https://github.com/KenKundert/ntlog/blob/master/README.rst"
+repository = "https://github.com/kenkundert/ntlog"
+changelog = "https://github.com/KenKundert/ntlog/blob/master/CHANGELOG.rst"
+
 [project.scripts]
 ntlog = "ntlog:main.main"
 
