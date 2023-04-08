@@ -53,7 +53,7 @@ are deleted.  If ``--delete`` is specified, the given log file is deleted after
 its contents are incorporated into the running log file.
 
 The key used when filing log entries into the *NestedText* document is the 
-timestamp for the modification time of the file.  The given logfile is always 
+timestamp of the modification time of the file.  The given logfile is always 
 kept, even if it is older than the ``--keep-for`` limit.
 
 Log entries are sorted from most recent to oldest, with the most recent at the 
