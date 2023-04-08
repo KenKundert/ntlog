@@ -143,3 +143,8 @@ def test_exceptions():
     ntlog = Run(['./run-ntlog', 'test.log'], 'sOEW1')
     assert ntlog.status == 1
     assert 'unrecognized line.' in ntlog.stderr
+
+    # attempt to read a bogus running log file
+    ntlog = Run(['./run-ntlog', '--keep-for', '2fortnight', 'test.log'], 'sOEW1')
+    assert ntlog.status == 1
+    assert 'unable to convert' in ntlog.stderr

@@ -60,7 +60,10 @@ def main():
     # Command line {{{2
     cmdline = docopt(__doc__)
     logfile = cmdline['<logfile>']
-    keep_for = Quantity(cmdline['--keep-for'], 'd', scale='s')
+    try:
+        keep_for = Quantity(cmdline['--keep-for'], 'd', scale='s')
+    except QuantiPhyError as e:
+        fatal(e, culprit=f'--keep-for={cmdline["--keep-for"]}')
     max_entries = to_int(cmdline['--max-entries'])
     min_entries = to_int(cmdline['--min-entries'])
     delete_given_log = cmdline['--delete']
