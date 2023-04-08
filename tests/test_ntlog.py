@@ -66,7 +66,6 @@ def exercise_ntlog(
             assert mtime in running_log, mtime
             assert running_log[mtime] == f"entry written = {age} days ago."
 
-
 def test_defaults():
     exercise_ntlog()
 
@@ -92,6 +91,17 @@ def test_min_entries():
 
 def test_max_entries():
     exercise_ntlog(max_entries=3)
+
+def test_retention():
+    # checks that you can add a given log file that is beyond the keep_for date
+    mtime = create_logfile(21)
+    Path('test.log.nt').unlink(missing_ok=True)
+    for i in range(5):
+        ntlog = Run(['./run-ntlog', 'test.log'], 'sOEW')
+        running_log = nt.load('test.log.nt')
+        mtimes = list(running_log.keys())
+        assert len(mtimes) == 1
+        assert mtimes[0] == str(mtime)
 
 def test_exceptions():
     running_logfile = Path('test.log.nt')
