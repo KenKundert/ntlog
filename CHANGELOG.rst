@@ -9,6 +9,10 @@ Latest development version
 | Released: 2023-04-07
 
 
+v0.1 (2023-04-08)
+-----------------
+- Add support for time units on --keep-for.
+
 v0.0 (2023-04-07)
 -----------------
-- initial release
+- Initial release.
