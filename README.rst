@@ -1,5 +1,5 @@
-ntLog — Append a file into an running NestedText log
-====================================================
+ntLog — a NestedText logfile aggregation utility
+================================================
 
 .. image:: https://pepy.tech/badge/ntlog/month
     :target: https://pepy.tech/project/ntlog
