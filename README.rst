@@ -47,14 +47,24 @@ overwritten.
         -h, --help               print this usage message
 
 When run, *ntLog* copies the contents of ``<logfile>`` into ``<logfile>.nt``.
-Any log entries that are older than ``--keep-for`` days are deleted.  In 
-addition, if the number of entries exceeds ``--max-entries``, the oldest entries 
-are deleted.  If ``--delete`` is specified, the given log file is deleted after 
-its contents are incorporated into the running log file.
+
+Log entries older than ``--keep-for`` days are deleted.  If units are not 
+specified, ``--keep-for`` is given in days.  However you can directly specify 
+the units in terms of seconds (s, sec, second, seconds), minutes (m, min, 
+minute, minutes), hours (h, hr, hour, hours), days (d, day, days), weeks (w, W, 
+week, weeks), months (M, month, months), and years (y, Y, year, years).
+
+If the number of entries exceeds ``--max-entries``, the oldest entries are 
+deleted even if they are younger than the ``--keep-for`` limit.
+
+If ``--delete`` is specified, the given log file is deleted after its contents 
+are incorporated into the running log file.
 
 The key used when filing log entries into the *NestedText* document is the 
-timestamp of the modification time of the file.  The given logfile is always 
-kept, even if it is older than the ``--keep-for`` limit.
+timestamp of the modification time of the given log file.
+
+The given log file is always kept, even if it is older than the ``--keep-for`` 
+limit.
 
 Log entries are sorted from most recent to oldest, with the most recent at the 
 top of the *NestedText* file.  The one exception to this rule is that the given 

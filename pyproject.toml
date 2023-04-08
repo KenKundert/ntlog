@@ -13,6 +13,7 @@ dependencies = [
     "docopt",
     "inform>=1.28",
     "nestedtext",
+    "quantiphy",
 ]
 classifiers = [
     "Development Status :: 4 - Beta",

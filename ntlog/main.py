@@ -23,6 +23,7 @@ __released__ = '2023-04-07'
 from docopt import docopt
 from inform import fatal, full_stop, os_error
 from pathlib import Path
+from quantiphy import Quantity, UnitConversion, QuantiPhyError
 import nestedtext as nt
 import arrow
 
@@ -44,16 +45,26 @@ def trim_dict(d, max_entries):
     # recently added items
     return dict(list(d.items())[:max_entries])
 
+# TIME CONVERSIONS {{{1
+UnitConversion("s", "sec second seconds")
+UnitConversion("s", "m min minute minutes", 60)
+UnitConversion("s", "h hr hour hours", 60*60)
+UnitConversion("s", "d day days", 24*60*60)
+UnitConversion("s", "w W week weeks", 7*24*60*60)
+UnitConversion("s", "M month months", 30*24*60*60)
+UnitConversion("s", "y Y year years", 365*24*60*60)
+Quantity.set_prefs(ignore_sf=True)
+
 # MAIN {{{1
 def main():
     # Command line {{{2
     cmdline = docopt(__doc__)
     logfile = cmdline['<logfile>']
-    keep_for = cmdline['--keep-for']
+    keep_for = Quantity(cmdline['--keep-for'], 'd', scale='s')
     max_entries = to_int(cmdline['--max-entries'])
     min_entries = to_int(cmdline['--min-entries'])
     delete_given_log = cmdline['--delete']
-    oldest = arrow.now().shift(days=-float(keep_for))
+    oldest = arrow.now().shift(seconds=-keep_for)
 
     # Load the running log, append the logfile, and write it out again {{{2
     try:
