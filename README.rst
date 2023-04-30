@@ -83,7 +83,6 @@ NTlog instances can be used as an output file stream, but instead of writing
 to stand-alone files their output is incorporated into a NestedText logfile.
 
 Arguments:
-
     running_log_file: (str, os.PathLike):
         The path to the composite log file.
     temp_log_file: (str, os.PathLike):
