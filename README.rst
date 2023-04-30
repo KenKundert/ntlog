@@ -20,6 +20,10 @@ ntLog — a NestedText logfile aggregation utility
 :Version: 0.2
 :Released: 2023-04-10
 
+
+Command-Line Application
+------------------------
+
 *ntLog* is a simple command line utility used to append discretely generated log 
 files into a running log formulated as a `NestedText <https://nestedtext.org>`_ 
 file.  You can specify limits on how many log entries there are or how old they 
@@ -70,6 +74,80 @@ Log entries are sorted from most recent to oldest, with the most recent at the
 top of the *NestedText* file.  The one exception to this rule is that the given 
 log file is always listed first, even if its modification time is older than 
 existing log entries.
+
+
+NTlog API
+---------
+
+NTlog instances can be used as an output file stream, but instead of writing
+to stand-alone files their output is incorporated into a NestedText logfile.
+
+Arguments:
+
+    running_log_file: (str, os.PathLike):
+        The path to the composite log file.
+    temp_log_file: (str, os.PathLike):
+        The path to the temporary log file.
+    keep_for (float, str):
+        Any entries older than keep_for (in seconds) are dropped.
+        If keep_for is a string, it is converted to seconds.  In this case
+        it assumed to be a number followed by a unit.  For example, '1w',
+        '6M', etc.
+    max_entries (int):
+        Maximum number of log entries to keep.
+    min_entries (int):
+        Minimum number of log entries to keep.
+    retain_temp (bool):
+        Do not delete the temporary log file after writing composite log
+        file.
+    mtime (datetime):
+        Used as the modification time of log entry.
+        If not specified, the current time is used.
+
+Raises:
+    OSError, inform.Error
+
+The use of the temp_log_file is optional.  It is helpful with long running 
+processes as it provides a way of monitoring the progress of the process, 
+especially if the logfile is routinely flushed.
+
+Example (no temp log)::
+
+    from ntlog import NTlog
+
+    with NTlog('appname.log.nt', keep_for='7d', max_entries=20):
+        ntlog.write('log message')
+
+Example (with temp log)::
+
+    with NTlog('appname.log.nt', 'appname.log', keep_for='7d', retain_temp=True):
+        ntlog.write('log message')
+        ...
+
+Example (with inform)::
+
+    from ntlog import NTlog
+    from inform import Inform, error, log
+
+    with (
+        NTlog('appname.log.nt', keep_for='7d') as ntlog,
+        Inform(logfile=ntlog) as inform,
+    ):
+        log('log message')
+        if there_is_a_problem:
+            error('error message')
+        ...
+
+Example (with temp log and inform)::
+
+    with (
+        NTlog('appname.log.nt', 'appname.log', keep_for='7d') as ntlog,
+        Inform(logfile=ntlog, flush=True) as inform,
+    ):
+        log('log message')
+        if there_is_a_problem:
+            error('error message')
+        ...
 
 
 Installation
