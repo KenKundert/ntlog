@@ -113,18 +113,27 @@ the text to be written to the logfile.
 Raises:
     OSError, NTlogError
 
+    *NTlogError* is a clone of the *Error* exception from
+    `Inform <https://inform.readthedocs.io/en/stable/api.html#inform.Error>`_.
+
 The use of the *temp_log_file* is optional.  It is helpful with long running 
 processes as it provides a way of monitoring the progress of the process, 
 especially if the logfile is routinely flushed.
 
-**Example** (no temp log)::
+**Example** (with error reporting)::
 
-    from ntlog import NTlog
+    from ntlog import NTlog, NTlogError
+    from inform import Inform, fatal, os_error
 
-    with NTlog('appname.log.nt', keep_for='7d', max_entries=20):
-        ntlog.write('a log message')
-        ntlog.write('another log message')
-        ...
+    try:
+        with NTlog('appname.log.nt', keep_for='7d', max_entries=20):
+            ntlog.write('a log message')
+            ntlog.write('another log message')
+            ...
+    except OSError as e:
+        fatal(os_error(e))
+    except NTlogError as e:
+        e.terminate()
 
 **Example** (with temp log)::
 
