@@ -113,6 +113,7 @@ def test_retention():
         mtime = arrow.now().shift(days=-age)
         with NTlog('test.log.nt', keep_for=14*86400, mtime=mtime) as ntlog:
             ntlog.write(f"entry written = {age} days ago.")
+            ntlog.flush()
         running_log = nt.load('test.log.nt')
         mtimes = list(running_log.keys())
         assert len(mtimes) == 1

@@ -6,5 +6,4 @@ precision=2
 show_missing=yes
 
 [run]
-source = ntlog
-omit = */.tox/*
+source_pkgs = ntlog
