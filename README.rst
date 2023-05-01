@@ -113,18 +113,20 @@ the text to be written to the logfile.
 Raises:
     OSError, NTlogError
 
-The use of the temp_log_file is optional.  It is helpful with long running 
+The use of the *temp_log_file* is optional.  It is helpful with long running 
 processes as it provides a way of monitoring the progress of the process, 
 especially if the logfile is routinely flushed.
 
-Example (no temp log)::
+**Example** (no temp log)::
 
     from ntlog import NTlog
 
     with NTlog('appname.log.nt', keep_for='7d', max_entries=20):
-        ntlog.write('log message')
+        ntlog.write('a log message')
+        ntlog.write('another log message')
+        ...
 
-Example (with temp log)::
+**Example** (with temp log)::
 
     with NTlog('appname.log.nt', 'appname.log', keep_for='7d', retain_temp=True):
         ntlog.write('log message')
@@ -133,26 +135,28 @@ Example (with temp log)::
 *NTlog* can be specified as the logfile to `Inform 
 <https://inform.readthedocs.io>_.
 
-Example (with inform)::
+**Example** (with inform)::
 
     from ntlog import NTlog
-    from inform import Inform, error, log
+    from inform import Inform, display, error, log
 
     with (
         NTlog('appname.log.nt', keep_for='7d') as ntlog,
         Inform(logfile=ntlog) as inform,
     ):
+        display('status message')
         log('log message')
         if there_is_a_problem:
             error('error message')
         ...
 
-Example (with temp log and inform)::
+**Example** (with temp log and inform)::
 
     with (
         NTlog('appname.log.nt', 'appname.log', keep_for='7d') as ntlog,
         Inform(logfile=ntlog, flush=True) as inform,
     ):
+        display('status message')
         log('log message')
         if there_is_a_problem:
             error('error message')
