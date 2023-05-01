@@ -63,7 +63,7 @@ class NTlog:
     """ NTlog
 
     NTlog instances can be used as an output file stream, but instead of writing
-    to stand-alone files their output is incorporated into a NestedText logfile.
+    to stand-alone files their output is incorporated into a NestedText_ logfile.
 
     Arguments:
         running_log_file: (str, os.PathLike):
@@ -92,8 +92,7 @@ class NTlog:
     Raises:
         OSError, NTlogError
 
-        *NTlogError* is a clone of the *Error* exception from
-        `Inform <https://inform.readthedocs.io/en/stable/api.html#inform.Error>`_.
+        *NTlogError* is a clone of the Error_ exception from Inform_.
 
     The use of *temp_log_file* is optional.  It is helpful with long running 
     processes as it provides a way of monitoring the progress of the process, 
@@ -143,6 +142,9 @@ class NTlog:
                 error('error message')
             ...
 
+    .. _NestedText: https://nestedtext.org
+    .. _Inform: https://inform.readthedocs.io
+    .. _Error: https://inform.readthedocs.io/en/stable/api.html#inform.Error
     """
 
     # constructor {{{3
