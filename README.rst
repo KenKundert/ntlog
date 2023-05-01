@@ -138,6 +138,7 @@ especially if the logfile is routinely flushed.
 
     with NTlog('appname.log.nt', 'appname.log', keep_for='7d', retain_temp=True):
         ntlog.write('log message')
+        ntlog.flush()
         ...
 
 *NTlog* can be specified as the logfile to Inform_.

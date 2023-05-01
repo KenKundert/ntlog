@@ -59,7 +59,7 @@ def trim_dict(d, max_entries):
 
 # NTlog class {{{1
 class NTlog:
-    # description {{{3
+    # description {{{2
     """ NTlog
 
     NTlog instances can be used as an output file stream, but instead of writing
@@ -115,17 +115,19 @@ class NTlog:
 
         with NTlog('appname.log.nt', 'appname.log', keep_for='7d', retain_temp=True):
             ntlog.write('log message')
+            ntlog.flush()
             ...
 
     Example (with inform)::
 
         from ntlog import NTlog
-        from inform import Inform, error, log
+        from inform import Inform, display, error, log
 
         with (
             NTlog('appname.log.nt', keep_for='7d') as ntlog,
             Inform(logfile=ntlog) as inform,
         ):
+            display('status message')
             log('log message')
             if there_is_a_problem:
                 error('error message')
@@ -137,6 +139,7 @@ class NTlog:
             NTlog('appname.log.nt', 'appname.log', keep_for='7d') as ntlog,
             Inform(logfile=ntlog, flush=True) as inform,
         ):
+            display('status message')
             log('log message')
             if there_is_a_problem:
                 error('error message')
@@ -147,13 +150,14 @@ class NTlog:
     .. _Error: https://inform.readthedocs.io/en/stable/api.html#inform.Error
     """
 
-    # constructor {{{3
+    # constructor {{{2
     def __init__(
         self, running_log_file, temp_log_file=None,
         *,
         keep_for=None, max_entries=None, min_entries=1,
         retain_temp=False, ctime=None
     ):
+        # preliminaries {{{3
         self.log = io.StringIO()
         self.running_log_file = Path(running_log_file)
         self.ctime = ctime
@@ -164,20 +168,20 @@ class NTlog:
         else:
             oldest = arrow.get(0)
 
-        # load running log
+        # load running log {{{3
         try:
             running_log = nt.load(self.running_log_file, dict)
         except FileNotFoundError:
             running_log = {}
 
-        # convert keys to time and sort
+        # convert keys to time and sort {{{3
         try:
             running_log = {arrow.get(k):v  for k,v in running_log.items()}
         except arrow.ParserError as e:
             raise Error(str(e).partition(' Try passing')[0], culprit=running_log_file)
         running_log = {k:running_log[k] for k in sorted(running_log, reverse=True)}
 
-        # filter running log
+        # filter running log {{{3
         if len(running_log) >= min_entries:
             truncated_log = {k:v for k,v in running_log.items() if k > oldest}
             if len(truncated_log) < min_entries-1:
@@ -188,7 +192,7 @@ class NTlog:
 
         self.running_log = running_log
 
-        # open temporary log file
+        # open temporary log file {{{3
         if temp_log_file:
             self.temp_log_file = Path(temp_log_file)
             self.temp_log = self.temp_log_file.open('w')
@@ -196,20 +200,20 @@ class NTlog:
         else:
             self.temp_log_file = None
 
-    # write() {{{3
+    # write() {{{2
     def write(self, text):
         if self.temp_log_file:
             self.temp_log.write(text)
         self.log.write(text)
 
-    # flush() {{{3
+    # flush() {{{2
     def flush(self):
         if self.temp_log_file:
             self.temp_log.flush()
 
-    # close() {{{3
+    # close() {{{2
     def close(self):
-        # create new log entry and add it to running log
+        # create new log entry and add it to running log {{{3
         if self.ctime:
             ctime = arrow.get(self.ctime).to('local')
         else:
@@ -222,15 +226,16 @@ class NTlog:
                 raise Error('attempt to overwrite log entry.', culprit=str(ctime))
         log.update(self.running_log)
 
-        # write out running log
+        # write out running log {{{3
         nt.dump(log, self.running_log_file, default=str)
 
-        # close and remove temp_log
+        # close and remove temp_log {{{3
         if self.temp_log_file:
             self.temp_log.close()
             if self.delete_temp:
                 self.temp_log_file.unlink()
 
+    # context manager methods {{{2
     def __enter__(self):
         return self
 
