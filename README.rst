@@ -195,6 +195,6 @@ Releases
 """"""""""""""""
     - Add support for time units on ``--keep-for``.
 
-.. _NestedText: https://nestedtext.org>
+.. _NestedText: https://nestedtext.org
 .. _Inform: https://inform.readthedocs.io
 .. _Error: https://inform.readthedocs.io/en/stable/api.html#inform.Error
