@@ -14,8 +14,8 @@ Options:
 Copies <logfile> into <logfile>.nt while deleting any log entries that are older 
 than the limit specified by --keep-for.
 """
-__version__ = '0.2'
-__released__ = '2023-04-10'
+__version__ = '0.3'
+__released__ = '2023-05-01'
 
 
 # IMPORTS {{{1
