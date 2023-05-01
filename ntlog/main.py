@@ -54,7 +54,7 @@ def main():
             keep_for = keep_for,
             max_entries = max_entries,
             min_entries = min_entries,
-            mtime = input_logfile.stat().st_mtime,
+            ctime = input_logfile.stat().st_mtime,
         ) as ntlog:
             log = input_logfile.read_text()
             ntlog.write(log)

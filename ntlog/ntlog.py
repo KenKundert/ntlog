@@ -67,9 +67,12 @@ class NTlog:
 
     Arguments:
         running_log_file: (str, os.PathLike):
-            The path to the composite log file.
+            The path to the composite log file.  Normally this uses .log.nt as
+            the suffix.
         temp_log_file: (str, os.PathLike):
-            The path to the temporary log file.
+            The path to the temporary log file.  Normally this uses .log.nt as
+            the suffix.  This is optional; if not given a temporary log file is
+            not created.
         keep_for (float, str):
             Any entries older than keep_for (in seconds) are dropped.
             If keep_for is a string, it is converted to seconds.  In this case
@@ -82,17 +85,17 @@ class NTlog:
         retain_temp (bool):
             Do not delete the temporary log file after writing composite log
             file.
-        mtime (datetime):
-            Used as the modification time of log entry.
+        ctime (string, float, datetime):
+            Used as the creation time of the log entry.
             If not specified, the current time is used.
 
     Raises:
         OSError, NTlogError
 
-        `NTlogError <https://inform.readthedocs.io/en/stable/api.html#inform.Error>`_ 
-        is a clone of the *Error* exception from *Inform*.
+        *NTlogError* is a clone of the *Error* exception from
+        `Inform <https://inform.readthedocs.io/en/stable/api.html#inform.Error>`_.
 
-    The use of the temp_log_file is optional.  It is helpful with long running 
+    The use of *temp_log_file* is optional.  It is helpful with long running 
     processes as it provides a way of monitoring the progress of the process, 
     especially if the logfile is routinely flushed.
 
@@ -129,7 +132,7 @@ class NTlog:
                 error('error message')
             ...
 
-    Example (with temp log and inform as logfile generator)::
+    Example (with temp log and inform)::
 
         with (
             NTlog('appname.log.nt', 'appname.log', keep_for='7d') as ntlog,
@@ -147,11 +150,11 @@ class NTlog:
         self, running_log_file, temp_log_file=None,
         *,
         keep_for=None, max_entries=None, min_entries=1,
-        retain_temp=False, mtime=None
+        retain_temp=False, ctime=None
     ):
         self.log = io.StringIO()
         self.running_log_file = Path(running_log_file)
-        self.mtime = mtime
+        self.ctime = ctime
         if is_str(keep_for):
             keep_for = Quantity(keep_for, 'd', scale='s')
         if keep_for:
@@ -205,16 +208,16 @@ class NTlog:
     # close() {{{3
     def close(self):
         # create new log entry and add it to running log
-        if self.mtime:
-            mtime = arrow.get(self.mtime).to('local')
+        if self.ctime:
+            ctime = arrow.get(self.ctime).to('local')
         else:
-            mtime = arrow.get().to('local')
+            ctime = arrow.get().to('local')
         contents = self.log.getvalue()
-        log = {mtime: contents}
+        log = {ctime: contents}
 
-        if mtime in self.running_log:
-            if contents != self.running_log[mtime]:
-                raise Error('attempt to overwrite log entry.', culprit=str(mtime))
+        if ctime in self.running_log:
+            if contents != self.running_log[ctime]:
+                raise Error('attempt to overwrite log entry.', culprit=str(ctime))
         log.update(self.running_log)
 
         # write out running log

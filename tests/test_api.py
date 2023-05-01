@@ -23,7 +23,7 @@ def find_key(expected, entries):
             return key
 
 def exercise_ntlog(delete_running_log=True, extra="", **kwargs):
-    assert 'mtime' not in kwargs
+    assert 'ctime' not in kwargs
     if 'running_log_file' not in kwargs:
         kwargs['running_log_file'] = 'test.log.nt'
     keep_for = kwargs.get('keep_for', 7)
@@ -36,17 +36,17 @@ def exercise_ntlog(delete_running_log=True, extra="", **kwargs):
     if delete_running_log:
         Path('test.log.nt').unlink(missing_ok=True)
 
-    mtimes = []
+    ctimes = []
     for days in reversed(range(days_upper_bound + 7)):
         now = arrow.now()
-        mtime = now.shift(days=-days)
-        mtimes.append(mtime)
-        mtime_to_use = mtime if days else None
+        ctime = now.shift(days=-days)
+        ctimes.append(ctime)
+        ctime_to_use = ctime if days else None
         temp_log_file = kwargs.get('temp_log_file')
         retain_temp = kwargs.get('retain_temp')
 
         # run ntlog and retrieve the results
-        with NTlog(mtime=mtime_to_use, **kwargs) as ntlog:
+        with NTlog(ctime=ctime_to_use, **kwargs) as ntlog:
             ntlog.write(f"entry written = {days} days ago.{extra}")
             if temp_log_file:
                 assert os.path.isfile(temp_log_file)
@@ -54,7 +54,7 @@ def exercise_ntlog(delete_running_log=True, extra="", **kwargs):
         running_log = {arrow.get(k): v for k, v in running_log.items()}
 
         # running log must contain the given log entry
-        assert find_key(mtime, running_log)
+        assert find_key(ctime, running_log)
 
         # check to see if given temp log was created if requested
         if temp_log_file:
@@ -62,34 +62,34 @@ def exercise_ntlog(delete_running_log=True, extra="", **kwargs):
 
         # check that the number of entries matches our expectations
         num_entries = len(running_log)
-        runs = len(mtimes)
+        runs = len(ctimes)
         assert num_entries <= min(runs, max_entries)
         assert num_entries >= min(runs, min_entries)
 
-        mtimes_to_check = mtimes[-num_entries:]
-        for mtime in mtimes_to_check:
-            age = (now - mtime).days
-            key = find_key(mtime, running_log)
-            assert key, str(mtime)
+        ctimes_to_check = ctimes[-num_entries:]
+        for ctime in ctimes_to_check:
+            age = (now - ctime).days
+            key = find_key(ctime, running_log)
+            assert key, str(ctime)
             assert running_log[key] == f"entry written = {age} days ago."
 
-    return mtimes
+    return ctimes
 
 def test_defaults():
-    mtimes = exercise_ntlog(running_log_file='test.log.nt')
+    ctimes = exercise_ntlog(running_log_file='test.log.nt')
 
     # now shrink keep_for and check that old entries are deleted
     now = arrow.now()
-    expected_mtimes = [mtime for mtime in mtimes if (now - mtime).days < 3]
+    expected_ctimes = [ctime for ctime in ctimes if (now - ctime).days < 3]
 
     with NTlog('test.log.nt', keep_for='3d') as nt_log:
         pass
     running_log = nt.load('test.log.nt')
-    mtimes = [arrow.get(k) for k in running_log.keys()]
+    ctimes = [arrow.get(k) for k in running_log.keys()]
     # trim off last update and reverse order
-    mtimes = list(reversed(mtimes[1:]))
-    assert len(mtimes) == len(expected_mtimes)
-    assert times_match(mtimes, expected_mtimes)
+    ctimes = list(reversed(ctimes[1:]))
+    assert len(ctimes) == len(expected_ctimes)
+    assert times_match(ctimes, expected_ctimes)
 
 def test_delete():
     exercise_ntlog(temp_log_file='test.log')
@@ -110,14 +110,14 @@ def test_retention():
     Path('test.log.nt').unlink(missing_ok=True)
     for i in range(5):
         age = 21 + i
-        mtime = arrow.now().shift(days=-age)
-        with NTlog('test.log.nt', keep_for=14*86400, mtime=mtime) as ntlog:
+        ctime = arrow.now().shift(days=-age)
+        with NTlog('test.log.nt', keep_for=14*86400, ctime=ctime) as ntlog:
             ntlog.write(f"entry written = {age} days ago.")
             ntlog.flush()
         running_log = nt.load('test.log.nt')
-        mtimes = list(running_log.keys())
-        assert len(mtimes) == 1
-        assert mtimes[0] == str(mtime)
+        ctimes = list(running_log.keys())
+        assert len(ctimes) == 1
+        assert ctimes[0] == str(ctime)
 
 def test_flush():
     # checks that you can add a given log file that is beyond the keep_for date
@@ -135,14 +135,14 @@ def test_flush():
 def test_exceptions():
     running_logfile = Path('test.log.nt')
 
-    # try to save a log file with same mtime but differing contents
+    # try to save a log file with same ctime but differing contents
     Path('test.log.nt').unlink(missing_ok=True)
     now = arrow.now()
-    mtime = now.timestamp()
+    ctime = now.timestamp()
     with pytest.raises(NTlogError) as exception:
-        with NTlog('test.log.nt', mtime=mtime) as ntlog:
+        with NTlog('test.log.nt', ctime=ctime) as ntlog:
             ntlog.write('Hey now!')
-        with NTlog('test.log.nt', mtime=mtime) as ntlog:
+        with NTlog('test.log.nt', ctime=ctime) as ntlog:
             ntlog.write('Hey there!')
     assert isinstance(exception.value, Error)
     assert str(exception.value) == f"{now!s}: attempt to overwrite log entry."
@@ -151,7 +151,7 @@ def test_exceptions():
     # attempt to read a running log file with a bogus datestamp
     Path('test.log.nt').write_text("not a date: contents")
     with pytest.raises(NTlogError) as exception:
-        with NTlog('test.log.nt', mtime=mtime) as ntlog:
+        with NTlog('test.log.nt', ctime=ctime) as ntlog:
             pass
     expected = "Expected an ISO 8601-like string, but was given 'not a date'."
     assert isinstance(exception.value, Error)
@@ -161,7 +161,7 @@ def test_exceptions():
     # attempt to read a running log file that is not valid NestedText
     Path('test.log.nt').write_text("not valid NestedText")
     with pytest.raises(NTlogError) as exception:
-        with NTlog('test.log.nt', mtime=mtime) as ntlog:
+        with NTlog('test.log.nt', ctime=ctime) as ntlog:
             pass
     expected = "unrecognized line."
     assert isinstance(exception.value, Error)

@@ -79,14 +79,21 @@ existing log entries.
 NTlog API
 ---------
 
-NTlog instances can be used as an output file stream, but instead of writing
-to stand-alone files their output is incorporated into a NestedText logfile.
+*ntLog* provides the *NTlog* class, whose instances can be used as an output 
+file stream in Python programs.  Instead of writing to stand-alone files their 
+output is incorporated directly into a NestedText composite logfile.
 
-Arguments:
+*NTlog* provides the normal methods for output file streams, *write*, *flush* 
+and *close*, and can act as a context manager.  Only *write* takes an argument, 
+the text to be written to the logfile.
+
+*NTlog* Arguments:
     running_log_file: (str, os.PathLike):
-        The path to the composite log file.
+        The path to the composite log file.  Normally this uses .log.nt as the 
+        suffix.
     temp_log_file: (str, os.PathLike):
-        The path to the temporary log file.
+        The path to the temporary log file.  Normally this uses .log as the 
+        suffix.  This is optional.
     keep_for (float, str):
         Any entries older than keep_for (in seconds) are dropped.
         If keep_for is a string, it is converted to seconds.  In this case
@@ -99,12 +106,12 @@ Arguments:
     retain_temp (bool):
         Do not delete the temporary log file after writing composite log
         file.
-    mtime (datetime):
-        Used as the modification time of log entry.
+    ctime (datetime):
+        Used as the creation time of the log entry.
         If not specified, the current time is used.
 
 Raises:
-    OSError, inform.Error
+    OSError, NTlogError
 
 The use of the temp_log_file is optional.  It is helpful with long running 
 processes as it provides a way of monitoring the progress of the process, 
@@ -122,6 +129,9 @@ Example (with temp log)::
     with NTlog('appname.log.nt', 'appname.log', keep_for='7d', retain_temp=True):
         ntlog.write('log message')
         ...
+
+*NTlog* can be specified as the logfile to `Inform 
+<https://inform.readthedocs.io>_.
 
 Example (with inform)::
 
