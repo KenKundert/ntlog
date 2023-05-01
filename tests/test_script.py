@@ -21,7 +21,7 @@ def exercise_ntlog(
     delete = None,
     delete_running_log = True
 ):
-    cmd = ['./run-ntlog']
+    cmd = ['ntlog']
     if keep_for:
         cmd.extend(['--keep-for', str(keep_for)])
     if min_entries:
@@ -74,7 +74,7 @@ def test_defaults():
     mtimes = [arrow.get(k) for k in running_log]
     expected_mtimes = [mtime for mtime in mtimes if (now - mtime).days < 3]
 
-    ntlog = Run(['./run-ntlog', '--keep-for', '3', 'test.log'], 'sOEW')
+    ntlog = Run(['ntlog', '--keep-for', '3', 'test.log'], 'sOEW')
     running_log = nt.load('test.log.nt')
     mtimes = [arrow.get(k) for k in running_log.keys()]
     assert len(mtimes) == len(expected_mtimes)
@@ -97,7 +97,7 @@ def test_retention():
     mtime = create_logfile(21)
     Path('test.log.nt').unlink(missing_ok=True)
     for i in range(5):
-        ntlog = Run(['./run-ntlog', 'test.log'], 'sOEW')
+        ntlog = Run(['ntlog', 'test.log'], 'sOEW')
         running_log = nt.load('test.log.nt')
         mtimes = list(running_log.keys())
         assert len(mtimes) == 1
@@ -107,44 +107,56 @@ def test_exceptions():
     running_logfile = Path('test.log.nt')
 
     running_logfile.unlink(missing_ok=True)
-    ntlog = Run(['./run-ntlog', 'does-not-exist'], 'sOEW1')
+    ntlog = Run(['ntlog', 'does-not-exist'], 'sOEW1')
     assert ntlog.status == 1
-    assert ntlog.stderr == 'run-ntlog error: does-not-exist: no such file or directory.\n'
+    assert ntlog.stderr == 'ntlog error: does-not-exist: no such file or directory.\n'
 
     running_logfile.unlink(missing_ok=True)
-    ntlog = Run(['./run-ntlog', '--max-entries', 'infinity', 'does-not-exist'], 'sOEW1')
+    ntlog = Run(['ntlog', '--max-entries', 'infinity', 'does-not-exist'], 'sOEW1')
     assert ntlog.status == 1
-    assert ntlog.stderr == 'run-ntlog error: infinity: could not convert to number.\n'
+    assert ntlog.stderr == 'ntlog error: infinity: could not convert to number.\n'
 
     running_logfile.unlink(missing_ok=True)
-    ntlog = Run(['./run-ntlog', '--min-entries', '0', 'does-not-exist'], 'sOEW1')
+    ntlog = Run(['ntlog', '--min-entries', '0', 'does-not-exist'], 'sOEW1')
     assert ntlog.status == 1
-    assert ntlog.stderr == 'run-ntlog error: 0: expected strictly positive number.\n'
+    assert ntlog.stderr == 'ntlog error: 0: expected strictly positive number.\n'
 
     # try to save a log file with same mtime but differing contents
     running_logfile.unlink(missing_ok=True)
     create_logfile(1)
-    ntlog = Run(['./run-ntlog', 'test.log'], 'sOEW1')
+    ntlog = Run(['ntlog', 'test.log'], 'sOEW1')
     assert ntlog.status == 0
     mtime = create_logfile(1, extra='\na difference')
-    ntlog = Run(['./run-ntlog', 'test.log'], 'sOEW1')
+    ntlog = Run(['ntlog', 'test.log'], 'sOEW1')
     assert ntlog.status == 1
-    #assert re.match('run-ntlog error: [^ ]+: attempt to overwrite log entry.\n', ntlog.stderr)
-    assert ntlog.stderr == f'run-ntlog error: {mtime!s}: attempt to overwrite log entry.\n'
+    #assert re.match('ntlog error: [^ ]+: attempt to overwrite log entry.\n', ntlog.stderr)
+    assert ntlog.stderr == f'ntlog error: {mtime!s}: attempt to overwrite log entry.\n'
 
     # attempt to read a running log file with a bogus datestamp
     path = running_logfile.write_text("not a date: contents")
-    ntlog = Run(['./run-ntlog', 'test.log'], 'sOEW1')
+    ntlog = Run(['ntlog', 'test.log'], 'sOEW1')
     assert ntlog.status == 1
     assert "Expected an ISO 8601-like string, but was given 'not a date'." in ntlog.stderr
 
     # attempt to read a bogus running log file
     path = running_logfile.write_text("not a valid NT file")
-    ntlog = Run(['./run-ntlog', 'test.log'], 'sOEW1')
+    ntlog = Run(['ntlog', 'test.log'], 'sOEW1')
     assert ntlog.status == 1
     assert 'unrecognized line.' in ntlog.stderr
 
     # attempt to read a bogus running log file
-    ntlog = Run(['./run-ntlog', '--keep-for', '2fortnight', 'test.log'], 'sOEW1')
+    ntlog = Run(['ntlog', '--keep-for', '2fortnight', 'test.log'], 'sOEW1')
     assert ntlog.status == 1
     assert 'unable to convert' in ntlog.stderr
+
+if __name__ == '__main__':
+    # As a debugging aid allow the tests to be run on their own, outside pytest.
+    # This makes it easier to see and interpret and textual output.
+
+    defined = dict(globals())
+    for k, v in defined.items():
+        if callable(v) and k.startswith('test_'):
+            print()
+            print('Calling:', k)
+            print((len(k)+9)*'=')
+            v()

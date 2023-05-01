@@ -1,2 +1,1 @@
-from .ntlog import NTlog
-from inform import Error as NTlogError
+from .ntlog import NTlog, Error as NTlogError

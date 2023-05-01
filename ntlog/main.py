@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 # DESCRIPTION {{{1
 """
 NTlog — append a log file into an running NestedText log

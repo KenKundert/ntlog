@@ -166,11 +166,14 @@ class NTlog:
             running_log = {}
 
         # convert keys to time and sort
-        running_log = {arrow.get(k):v  for k,v in running_log.items()}
+        try:
+            running_log = {arrow.get(k):v  for k,v in running_log.items()}
+        except arrow.ParserError as e:
+            raise Error(str(e).partition(' Try passing')[0], culprit=running_log_file)
         running_log = {k:running_log[k] for k in sorted(running_log, reverse=True)}
 
         # filter running log
-        if len(running_log) > min_entries:
+        if len(running_log) >= min_entries:
             truncated_log = {k:v for k,v in running_log.items() if k > oldest}
             if len(truncated_log) < min_entries-1:
                 truncated_log = trim_dict(running_log, min_entries-1)
@@ -202,7 +205,10 @@ class NTlog:
     # close() {{{3
     def close(self):
         # create new log entry and add it to running log
-        mtime = arrow.get(self.mtime).to('local')
+        if self.mtime:
+            mtime = arrow.get(self.mtime).to('local')
+        else:
+            mtime = arrow.get().to('local')
         contents = self.log.getvalue()
         log = {mtime: contents}
 
