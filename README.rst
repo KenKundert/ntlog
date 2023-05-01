@@ -178,3 +178,21 @@ Installation
 Install with::
 
     pip install ntlog
+
+Releases
+--------
+**Latest Development Version**:
+    | Version: 0.3
+    | Released: 2023-05-01
+
+0.3 (2023-05-01)
+""""""""""""""""
+    - Add Python API.
+
+0.2 (2023-04-10)
+""""""""""""""""
+    - Improve error handling
+
+0.1 (2023-04-08)
+""""""""""""""""
+    - Add support for time units on ``--keep-for``.
