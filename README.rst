@@ -185,15 +185,15 @@ Releases
 
 0.3 (2023-05-01)
 """"""""""""""""
-    - Add Python API.
+- Add Python API.
 
 0.2 (2023-04-10)
 """"""""""""""""
-    - Improve error handling
+- Improve error handling
 
 0.1 (2023-04-08)
 """"""""""""""""
-    - Add support for time units on ``--keep-for``.
+- Add support for time units on ``--keep-for``.
 
 .. _NestedText: https://nestedtext.org
 .. _Inform: https://inform.readthedocs.io
