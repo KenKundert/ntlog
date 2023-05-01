@@ -179,7 +179,9 @@ Install with::
 
 Releases
 --------
-**Latest Development Version**:
+
+Latest Development Version
+""""""""""""""""""""""""""
     | Version: 0.3
     | Released: 2023-05-01
 
