@@ -182,8 +182,8 @@ Releases
 
 Latest Development Version
 """"""""""""""""""""""""""
-    | Version: 0.3
-    | Released: 2023-05-01
+| Version: 0.3
+| Released: 2023-05-01
 
 0.3 (2023-05-01)
 """"""""""""""""
