@@ -10,7 +10,7 @@ at NestedText file where the creation time is used as the key for the entries.
 """
 
 # MIT LICENSE {{{1
-# Copyright (c) 2020-2023 Ken Kundert
+# Copyright (c) 2020-2024 Ken Kundert
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -51,10 +51,19 @@ UnitConversion("s", "y Y year years", 365*24*60*60)
 Quantity.set_prefs(ignore_sf=True)
 
 # trim_dict() {{{2
+# Trim the dictionary such that it contains only the max_entries most
+# recently added items.
 def trim_dict(d, max_entries):
-    # trim the dictionary such that it contains only the max_entries most
-    # recently added items
     return dict(list(d.items())[:max_entries])
+
+# comment() {{{2
+# Add comment leader if first non-white-space header is not a #.
+def create_header(date, format):
+    text = date.format(format)
+    prefix = ''
+    if text and text.lstrip()[0] != '#':
+        prefix = '# '
+    return prefix + text
 
 
 # NTlog class {{{1
@@ -88,6 +97,20 @@ class NTlog:
         ctime (string, float, datetime):
             Used as the creation time of the log entry.
             If not specified, the current time is used.
+        year_header (string):
+            When specified, this header is added above the first entry from a new year.
+        month_header (string):
+            When specified, this header is added above the first entry from a new month.
+        day_header (string):
+            When specified, this header is added above the first entry from a new day.
+        hour_header (string):
+            When specified, this header is added above the first entry from a new hour.
+        entry_header (string):
+            When specified, this header is added above every entry.
+        fold_marker_mapping ([str, str]):
+            When specified, any instances of the first string in a log file are
+            replaced by the second string when incorporating that log into the
+            output NestedText file.
 
     Raises:
         OSError, NTlogError
@@ -155,8 +178,17 @@ class NTlog:
         self, running_log_file, temp_log_file=None,
         *,
         keep_for=None, max_entries=None, min_entries=1,
-        retain_temp=False, ctime=None
+        retain_temp=False, ctime=None,
+        year_header=None, month_header=None, day_header=None, hour_header=None,
+        entry_header=None, fold_marker_mapping=None
     ):
+        self.year_header = year_header
+        self.month_header = month_header
+        self.day_header = day_header
+        self.hour_header = hour_header
+        self.entry_header = entry_header
+        self.fold_marker_mapping = fold_marker_mapping
+
         # preliminaries {{{3
         self.log = io.StringIO()
         self.running_log_file = Path(running_log_file)
@@ -204,6 +236,8 @@ class NTlog:
     def write(self, text):
         if self.temp_log_file:
             self.temp_log.write(text)
+        if self.fold_marker_mapping:
+            text = text.replace(*self.fold_marker_mapping)
         self.log.write(text)
 
     # flush() {{{2
@@ -227,7 +261,46 @@ class NTlog:
         log.update(self.running_log)
 
         # write out running log {{{3
-        nt.dump(log, self.running_log_file, default=str)
+        self.dump(log)
+
+    def dump(self, log):
+        output = []
+        year = month = day = hour = None
+        for date, text in log.items():
+
+            # add year header if requested
+            if self.year_header and date.year != year:
+                output.append(create_header(date, self.year_header))
+                year = date.year
+                month = day = hour = None
+
+            # add month header if requested
+            if self.month_header and date.month != month:
+                output.append(create_header(date, self.month_header))
+                month = date.month
+                day = hour = None
+
+            # add day header if requested
+            if self.day_header and date.day != day:
+                output.append(create_header(date, self.day_header))
+                day = date.day
+                hour = None
+
+            # add hour header if requested
+            if self.hour_header and date.hour != hour:
+                output.append(create_header(date, self.hour_header))
+                hour = date.hour
+
+            # add entry header if requested
+            if self.entry_header:
+                output.append(create_header(date, self.entry_header))
+
+            # add entry
+            output.append(nt.dumps({date: text}, default=str))
+            output.append('')
+
+        self.running_log_file.write_text('\n'.join(output) + '\n')
+
 
         # close and remove temp_log {{{3
         if self.temp_log_file:

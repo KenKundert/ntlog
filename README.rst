@@ -49,6 +49,12 @@ will not be overwritten.
         -N, --min-entries [N]    minimum number of log entries to keep [default: 1]
         -d, --delete             delete given logfile after incorporating it
         -h, --help               print this usage message
+        -Y, --year <fmt>         add year headers
+        -M, --month <fmt>        add month headers
+        -D, --day <fmt>          add day headers
+        -H, --hour <fmt>         add hour headers
+        -E, --entry <fmt>        add entry headers
+        --fold-marker <mapping>  map fold markers contained in logfile
 
 When run, *ntLog* copies the contents of ``<logfile>`` into ``<logfile>.nt``.
 
@@ -74,6 +80,42 @@ Log entries are sorted from most recent to oldest, with the most recent at the
 top of the *NestedText* file.  The one exception to this rule is that the given 
 log file is always listed first, even if its modification time is older than 
 existing log entries.
+
+
+Headers
+"""""""
+
+Any headers you specify are added as comments above the appropriate entries.
+When a year header is specified, it is added before the first entry found from 
+new year.  The same is true for month, day, and hour headers.  The entry header 
+it given before each entry.  An entry is treated as an Arrow_ format.  It 
+consists of tokens that are to be replaced by components from the entry date 
+stamp.  For example, if you specify::
+
+    --entry 'D MMMM YYYY, h:mm A'
+
+Then you will get a entry header command that looks like this::
+
+    # 31 December 2023, 6:00 PM
+    2023-12-31T18:00:25.680009-08:00:
+        > ...
+
+It is attractive to include editor fold markers in the headers.  In doing so you 
+can collapse large log entries into a single line folds until they are needed, 
+at which point you can easily open the fold and examine the contents of the log 
+file.  Here is an example set of header specifications that include Vim fold 
+markers::
+
+    --year 'YYYY  {{{1'
+    --month 'MMMM YYYY  {{{2'
+    --day 'D MMMM YYYY  {{{3'
+    --entry 'D MMMM YYYY, h:mm A  {{{4'
+
+If your logfiles tend to include fold markers, they can confuse the folds.  You 
+can prevent this by mapping the marker into a different string.   Use 
+``--fold-marker``::
+
+    --fold-marker '{{{ {<{'
 
 
 NTlog API
@@ -109,6 +151,20 @@ the text to be written to the logfile.
     ctime (datetime):
         Used as the creation time of the log entry.
         If not specified, the current time is used.
+    year_header (string):
+        When specified, this header is added above the first entry from a new year.
+    month_header (string):
+        When specified, this header is added above the first entry from a new month.
+    day_header (string):
+        When specified, this header is added above the first entry from a new day.
+    hour_header (string):
+        When specified, this header is added above the first entry from a new hour.
+    entry_header (string):
+        When specified, this header is added above every entry.
+    fold_marker_mapping ([str, str]):
+        When specified, any instances of the first string in a log file are
+        replaced by the second string when incorporating that log into the
+        output NestedText file.
 
 Raises:
     OSError, NTlogError
@@ -201,3 +257,4 @@ Latest Development Version
 .. _NestedText: https://nestedtext.org
 .. _Inform: https://inform.readthedocs.io
 .. _Error: https://inform.readthedocs.io/en/stable/api.html#inform.Error
+.. _Arrow: https://arrow.readthedocs.io/en/latest/guide.html#supported-tokens
