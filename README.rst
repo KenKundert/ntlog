@@ -151,15 +151,15 @@ the text to be written to the logfile.
     ctime (datetime):
         Used as the creation time of the log entry.
         If not specified, the current time is used.
-    year_header (string):
+    year_header (str):
         When specified, this header is added above the first entry from a new year.
-    month_header (string):
+    month_header (str):
         When specified, this header is added above the first entry from a new month.
-    day_header (string):
+    day_header (str):
         When specified, this header is added above the first entry from a new day.
-    hour_header (string):
+    hour_header (str):
         When specified, this header is added above the first entry from a new hour.
-    entry_header (string):
+    entry_header (str):
         When specified, this header is added above every entry.
     fold_marker_mapping ([str, str]):
         When specified, any instances of the first string in a log file are
