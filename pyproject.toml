@@ -1,6 +1,6 @@
 [project]
 name = "ntlog"
-version = "0.3"
+version = "0.3.1rc1"
 description = "Append a log file to an running NestedText log"
 readme = "README.rst"
 keywords = ["nestedtext", "logging"]
