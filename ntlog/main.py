@@ -6,17 +6,17 @@ Usage:
     ntlog [options] <logfile>
 
 Options:
-    -k, --keep-for [days]    drop entries older than this [default: 7]
-    -n, --max-entries [N]    maximum number of log entries to keep
-    -N, --min-entries [N]    minimum number of log entries to keep [default: 1]
-    -d, --delete             delete given logfile after incorporating it
-    -Y, --year <fmt>         add year headers
-    -M, --month <fmt>        add month headers
-    -D, --day <fmt>          add day headers
-    -H, --hour <fmt>         add hour headers
-    -E, --entry <fmt>        add entry headers
-    --fold-marker <mapping>  map fold markers contained in logfile
-
+    -k, --keep-for [days]     drop entries older than this [default: 7]
+    -n, --max-entries [N]     maximum number of log entries to keep
+    -N, --min-entries [N]     minimum number of log entries to keep [default: 1]
+    -d, --delete              delete given logfile after incorporating it
+    -Y, --year <fmt>          add year headers
+    -M, --month <fmt>         add month headers
+    -D, --day <fmt>           add day headers
+    -H, --hour <fmt>          add hour headers
+    -E, --entry <fmt>         add entry headers
+    -d, --description <text>  description for entry header for new log entry
+    --fold-marker <mapping>   map fold markers contained in logfile
 
 Copies <logfile> into <logfile>.nt while deleting any log entries that are older 
 than the limit specified by --keep-for.
@@ -76,7 +76,8 @@ def main():
             day_header = cmdline['--day'],
             hour_header = cmdline['--hour'],
             entry_header = cmdline['--entry'],
-            fold_marker_mapping = fold_marker_mapping
+            fold_marker_mapping = fold_marker_mapping,
+            description = cmdline['--description']
         ) as ntlog:
             log = input_logfile.read_text()
             ntlog.write(log)

@@ -58,12 +58,29 @@ def trim_dict(d, max_entries):
 
 # comment() {{{2
 # Add comment leader if first non-white-space header is not a #.
-def create_header(date, format):
+def create_header(date, format, description=None):
     text = date.format(format)
     prefix = ''
+    if description:
+        text = f"{description} ― {text}"
     if text and text.lstrip()[0] != '#':
         prefix = '# '
     return prefix + text
+
+# extract_key {{{3
+def extract_key(key):
+    # split description from date, and convert to tuple
+    components = [c.strip() for c in key.split('―')]
+    if len(components) == 2:
+        description, date = components
+    elif len(components) == 1:
+        date = components[0]
+        description = None
+    return arrow.get(date), description
+
+# encode_key {{{3
+def encode_key(date, description):
+    return f"{description} ― {date!s}" if description else str(date)
 
 
 # NTlog class {{{1
@@ -180,7 +197,7 @@ class NTlog:
         keep_for=None, max_entries=None, min_entries=1,
         retain_temp=False, ctime=None,
         year_header=None, month_header=None, day_header=None, hour_header=None,
-        entry_header=None, fold_marker_mapping=None
+        entry_header=None, fold_marker_mapping=None, description=None
     ):
         self.year_header = year_header
         self.month_header = month_header
@@ -188,6 +205,10 @@ class NTlog:
         self.hour_header = hour_header
         self.entry_header = entry_header
         self.fold_marker_mapping = fold_marker_mapping
+        self.description = description.replace('―', '—') if description else None
+            # horizontal rule is used to separate description and datestamp
+            # thus, if description contains a horizontal rule, replace it with
+            # em dash to avoid confusion
 
         # preliminaries {{{3
         self.log = io.StringIO()
@@ -206,16 +227,15 @@ class NTlog:
         except FileNotFoundError:
             running_log = {}
 
-        # convert keys to time and sort {{{3
         try:
-            running_log = {arrow.get(k):v  for k,v in running_log.items()}
+            running_log = {extract_key(k):v  for k,v in running_log.items()}
         except arrow.ParserError as e:
             raise Error(str(e).partition(' Try passing')[0], culprit=running_log_file)
         running_log = {k:running_log[k] for k in sorted(running_log, reverse=True)}
 
         # filter running log {{{3
         if len(running_log) >= min_entries:
-            truncated_log = {k:v for k,v in running_log.items() if k > oldest}
+            truncated_log = {k:v for k,v in running_log.items() if k[0] > oldest}
             if len(truncated_log) < min_entries-1:
                 truncated_log = trim_dict(running_log, min_entries-1)
             running_log = truncated_log
@@ -253,11 +273,12 @@ class NTlog:
         else:
             ctime = arrow.get().to('local')
         contents = self.log.getvalue()
-        log = {ctime: contents}
+        key = (ctime, self.description)
+        log = {key: contents}
 
-        if ctime in self.running_log:
-            if contents != self.running_log[ctime]:
-                raise Error('attempt to overwrite log entry.', culprit=str(ctime))
+        if key in self.running_log:
+            if contents != self.running_log[key]:
+                raise Error('attempt to overwrite log entry.', culprit=encode_key(*key))
         log.update(self.running_log)
 
         # write out running log {{{3
@@ -266,7 +287,8 @@ class NTlog:
     def dump(self, log):
         output = []
         year = month = day = hour = None
-        for date, text in log.items():
+        for key, text in log.items():
+            date, description = key
 
             # add year header if requested
             if self.year_header and date.year != year:
@@ -293,14 +315,13 @@ class NTlog:
 
             # add entry header if requested
             if self.entry_header:
-                output.append(create_header(date, self.entry_header))
+                output.append(create_header(date, self.entry_header, description))
 
             # add entry
-            output.append(nt.dumps({date: text}, default=str))
+            output.append(nt.dumps({encode_key(date, description): text}))
             output.append('')
 
         self.running_log_file.write_text('\n'.join(output) + '\n')
-
 
         # close and remove temp_log {{{3
         if self.temp_log_file:

@@ -44,17 +44,18 @@ will not be overwritten.
 
     Options:
 
-        -k, --keep-for [days]    drop entries older than this [default: 7]
-        -n, --max-entries [N]    maximum number of log entries to keep
-        -N, --min-entries [N]    minimum number of log entries to keep [default: 1]
-        -d, --delete             delete given logfile after incorporating it
-        -h, --help               print this usage message
-        -Y, --year <fmt>         add year headers
-        -M, --month <fmt>        add month headers
-        -D, --day <fmt>          add day headers
-        -H, --hour <fmt>         add hour headers
-        -E, --entry <fmt>        add entry headers
-        --fold-marker <mapping>  map fold markers contained in logfile
+        -k, --keep-for [days]     drop entries older than this [default: 7]
+        -n, --max-entries [N]     maximum number of log entries to keep
+        -N, --min-entries [N]     minimum number of log entries to keep [default: 1]
+        -d, --delete              delete given logfile after incorporating it
+        -h, --help                print this usage message
+        -Y, --year <fmt>          add year headers
+        -M, --month <fmt>         add month headers
+        -D, --day <fmt>           add day headers
+        -H, --hour <fmt>          add hour headers
+        -E, --entry <fmt>         add entry headers
+        -d, --description <text>  add entry headers
+        --fold-marker <mapping>   map fold markers contained in logfile
 
 When run, *ntLog* copies the contents of ``<logfile>`` into ``<logfile>.nt``.
 
@@ -99,6 +100,15 @@ Then you will get a entry header command that looks like this::
     # 31 December 2023, 6:00 PM
     2023-12-31T18:00:25.680009-08:00:
         > ...
+
+If you specify a description, it will be prepended to the datestamp in the key 
+for the new log entry and will be prepended to the entry header.  For example, 
+if ``--description create`` were specified, the result might look like::
+
+    # create — 31 December 2023, 6:00 PM
+    create — 2023-12-31T18:00:25.680009-08:00:
+        > ...
+
 
 It is attractive to include editor fold markers in the headers.  In doing so you 
 can collapse large log entries into a single line folds until they are needed, 
@@ -161,6 +171,10 @@ the text to be written to the logfile.
         When specified, this header is added above the first entry from a new hour.
     entry_header (str):
         When specified, this header is added above every entry.
+    description (str):
+        This string is prepended to the datestamp to create the key for the new 
+        log entry.  It is also prepended to the entry header, if it is 
+        requested.
     fold_marker_mapping ([str, str]):
         When specified, any instances of the first string in a log file are
         replaced by the second string when incorporating that log into the
