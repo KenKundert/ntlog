@@ -256,7 +256,7 @@ Latest Development Version
 | Version: 0.4rc2
 | Released: 2024-01-03
 
-0.4 (2024-??-??)
+0.4 (2024-01-29)
 """"""""""""""""
 - Add support for headers and fold markers.
 
