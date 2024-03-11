@@ -141,8 +141,9 @@ the text to be written to the logfile.
 
 *NTlog* Arguments:
     running_log_file: (str, os.PathLike):
-        The path to the composite log file.  Normally this uses .log.nt as the 
-        suffix.
+        The path to the composite log file.  Normally this uses .log.nt as
+        the suffix.  If not given, then the name of the temp_log_file with
+        an added .nt suffix is used.
     temp_log_file: (str, os.PathLike):
         The path to the temporary log file.  Normally this uses .log as the 
         suffix.  This is optional.

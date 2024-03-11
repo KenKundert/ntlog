@@ -32,11 +32,11 @@ at NestedText file where the creation time is used as the key for the entries.
 
 # IMPORTS {{{1
 from inform import Error, is_str
-from pathlib import Path
 from quantiphy import Quantity, UnitConversion, QuantiPhyError
+import nestedtext as nt
+from pathlib import Path
 import arrow
 import io
-import nestedtext as nt
 
 
 # UTILITIES {{{1
@@ -94,11 +94,13 @@ class NTlog:
     Arguments:
         running_log_file: (str, os.PathLike):
             The path to the composite log file.  Normally this uses .log.nt as
-            the suffix.
+            the suffix.  If not given, then the name of the temp_log_file with
+            an added .nt suffix is used.
         temp_log_file: (str, os.PathLike):
             The path to the temporary log file.  Normally this uses .log.nt as
             the suffix.  This is optional; if not given a temporary log file is
             not created.
+        *
         keep_for (float, str):
             Any entries older than keep_for (in seconds) are dropped.
             If keep_for is a string, it is converted to seconds.  In this case
@@ -124,6 +126,8 @@ class NTlog:
             When specified, this header is added above the first entry from a new hour.
         entry_header (string):
             When specified, this header is added above every entry.
+        description (string):
+            When specified, this string is appended to the key and entry_header.
         fold_marker_mapping ([str, str]):
             When specified, any instances of the first string in a log file are
             replaced by the second string when incorporating that log into the
@@ -192,12 +196,12 @@ class NTlog:
 
     # constructor {{{2
     def __init__(
-        self, running_log_file, temp_log_file=None,
+        self, running_log_file=None, temp_log_file=None,
         *,
         keep_for=None, max_entries=None, min_entries=1,
         retain_temp=False, ctime=None,
         year_header=None, month_header=None, day_header=None, hour_header=None,
-        entry_header=None, fold_marker_mapping=None, description=None
+        entry_header=None, description=None, fold_marker_mapping=None
     ):
         self.year_header = year_header
         self.month_header = month_header
@@ -212,6 +216,13 @@ class NTlog:
 
         # preliminaries {{{3
         self.log = io.StringIO()
+        if temp_log_file:
+            temp_log_file = Path(temp_log_file)
+            self.temp_log_file = temp_log_file
+            if not running_log_file:
+                running_log_file = temp_log_file.with_suffix(
+                    ''.join(temp_log_file.suffixes) + '.nt'
+                )
         self.running_log_file = Path(running_log_file)
         self.ctime = ctime
         if is_str(keep_for):
@@ -246,7 +257,6 @@ class NTlog:
 
         # open temporary log file {{{3
         if temp_log_file:
-            self.temp_log_file = Path(temp_log_file)
             self.temp_log = self.temp_log_file.open('w')
             self.delete_temp = not retain_temp
         else:
@@ -328,6 +338,12 @@ class NTlog:
             self.temp_log.close()
             if self.delete_temp:
                 self.temp_log_file.unlink()
+
+    # __str__() {{{2
+    def __str__(self):
+        if self.temp_log_file:
+            return str(self.temp_log_file)
+        return str(self.running_log_file)
 
     # context manager methods {{{2
     def __enter__(self):
