@@ -3,7 +3,6 @@ from shlib import Run
 import nestedtext as nt
 import arrow
 import os
-import re
 
 now = arrow.now()
 
@@ -44,7 +43,7 @@ def exercise_ntlog(
     for days in reversed(range(upper_bound + 7)):
         ctime = create_logfile(days)
         ctimes.append(ctime)
-        ntlog = Run(cmd, 'sOEW')
+        Run(cmd, 'sOEW')
         running_log = nt.load('test.log.nt')
 
         # running log must contain the given log entry
@@ -74,7 +73,7 @@ def test_defaults():
     ctimes = [arrow.get(k) for k in running_log]
     expected_ctimes = [ctime for ctime in ctimes if (now - ctime).days < 3]
 
-    ntlog = Run(['ntlog', '--keep-for', '3', 'test.log'], 'sOEW')
+    Run(['ntlog', '--keep-for', '3', 'test.log'], 'sOEW')
     running_log = nt.load('test.log.nt')
     ctimes = [arrow.get(k) for k in running_log.keys()]
     assert len(ctimes) == len(expected_ctimes)
@@ -97,7 +96,7 @@ def test_retention():
     ctime = create_logfile(21)
     Path('test.log.nt').unlink(missing_ok=True)
     for i in range(5):
-        ntlog = Run(['ntlog', 'test.log'], 'sOEW')
+        Run(['ntlog', 'test.log'], 'sOEW')
         running_log = nt.load('test.log.nt')
         ctimes = list(running_log.keys())
         assert len(ctimes) == 1
@@ -139,7 +138,7 @@ def test_exceptions():
     assert "Expected an ISO 8601-like string, but was given 'not a date'." in ntlog.stderr
 
     # attempt to read a bogus running log file
-    path = running_logfile.write_text("not a valid NT file")
+    running_logfile.write_text("not a valid NT file")
     ntlog = Run(['ntlog', 'test.log'], 'sOEW1')
     assert ntlog.status == 1
     assert 'unrecognized line.' in ntlog.stderr

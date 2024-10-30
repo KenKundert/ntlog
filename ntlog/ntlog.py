@@ -31,7 +31,7 @@ at NestedText file where the creation time is used as the key for the entries.
 # SOFTWARE.
 
 # IMPORTS {{{1
-from inform import Error, is_str
+from inform import Error, error, is_str
 from quantiphy import Quantity, UnitConversion, QuantiPhyError
 import nestedtext as nt
 from pathlib import Path
@@ -48,7 +48,6 @@ UnitConversion("s", "d day days", 24*60*60)
 UnitConversion("s", "w W week weeks", 7*24*60*60)
 UnitConversion("s", "M month months", 30*24*60*60)
 UnitConversion("s", "y Y year years", 365*24*60*60)
-Quantity.set_prefs(ignore_sf=True)
 
 # trim_dict() {{{2
 # Trim the dictionary such that it contains only the max_entries most
@@ -85,6 +84,11 @@ def encode_key(date, description):
 
 # NTlog class {{{1
 class NTlog:
+
+    MODE_LINES = dict(
+        vim = "# vim: set shiftwidth=4 softtabstop=4 expandtab nowrap foldmethod=marker:"
+    )
+
     # description {{{2
     """ NTlog
 
@@ -132,6 +136,8 @@ class NTlog:
             When specified, any instances of the first string in a log file are
             replaced by the second string when incorporating that log into the
             output NestedText file.
+        editor (str):
+            Add editor mode line if given.  Currently only 'vim' is available.
 
     Raises:
         OSError, NTlogError
@@ -201,7 +207,8 @@ class NTlog:
         keep_for=None, max_entries=None, min_entries=1,
         retain_temp=False, ctime=None,
         year_header=None, month_header=None, day_header=None, hour_header=None,
-        entry_header=None, description=None, fold_marker_mapping=None
+        entry_header=None, description=None, fold_marker_mapping=None,
+        editor=None
     ):
         self.year_header = year_header
         self.month_header = month_header
@@ -214,6 +221,13 @@ class NTlog:
             # thus, if description contains a horizontal rule, replace it with
             # em dash to avoid confusion
 
+        self.mode_line = None
+        if editor:
+            try:
+                self.mode_line = self.MODE_LINES[editor]
+            except KeyError:
+                error('unknown editor.', culprit=editor)
+
         # preliminaries {{{3
         self.log = io.StringIO()
         if temp_log_file:
@@ -221,12 +235,15 @@ class NTlog:
             self.temp_log_file = temp_log_file
             if not running_log_file:
                 running_log_file = temp_log_file.with_suffix(
-                    ''.join(temp_log_file.suffixes) + '.nt'
+                    temp_log_file.suffix + '.nt'
                 )
         self.running_log_file = Path(running_log_file)
         self.ctime = ctime
         if is_str(keep_for):
-            keep_for = Quantity(keep_for, 'd', scale='s')
+            try:
+                keep_for = Quantity(keep_for, 'd', scale='s', ignore_sf=True)
+            except QuantiPhyError as e:
+                raise Error(e, culprit='--keep-for')
         if keep_for:
             oldest = arrow.now().shift(seconds=-keep_for)
         else:
@@ -294,7 +311,9 @@ class NTlog:
         # write out running log {{{3
         self.dump(log)
 
+    # dump() {{{2
     def dump(self, log):
+        # write out running log {{{3
         output = []
         year = month = day = hour = None
         for key, text in log.items():
@@ -330,6 +349,9 @@ class NTlog:
             # add entry
             output.append(nt.dumps({encode_key(date, description): text}))
             output.append('')
+
+        if self.mode_line:
+            output.append(self.mode_line)
 
         self.running_log_file.write_text('\n'.join(output) + '\n')
 

@@ -1,11 +1,10 @@
 from pathlib import Path
 from ntlog import NTlog, NTlogError
-from inform import Error
+from inform import Error, dedent
 import nestedtext as nt
 import arrow
 import os
 import pytest
-import re
 
 def time_matches(found, expected, tolerance=5):
     return (
@@ -82,7 +81,7 @@ def test_defaults():
     now = arrow.now()
     expected_ctimes = [ctime for ctime in ctimes if (now - ctime).days < 3]
 
-    with NTlog('test.log.nt', keep_for='3d') as nt_log:
+    with NTlog('test.log.nt', keep_for='3d'):
         pass
     running_log = nt.load('test.log.nt')
     ctimes = [arrow.get(k) for k in running_log.keys()]
@@ -126,7 +125,7 @@ def test_flush():
     running_log_file.unlink(missing_ok=True)
     temp_log_file.unlink(missing_ok=True)
     with NTlog(running_log_file, temp_log_file, retain_temp=False) as ntlog:
-            ntlog.write(f"Hey now!")
+            ntlog.write("Hey now!")
             ntlog.flush()
             contents = temp_log_file.read_text()
             assert contents == "Hey now!"
@@ -136,22 +135,22 @@ def test_exceptions():
     running_logfile = Path('test.log.nt')
 
     # try to save a log file with same ctime but differing contents
-    Path('test.log.nt').unlink(missing_ok=True)
+    running_logfile.unlink(missing_ok=True)
     now = arrow.now()
     ctime = now.timestamp()
     with pytest.raises(NTlogError) as exception:
-        with NTlog('test.log.nt', ctime=ctime) as ntlog:
+        with NTlog(running_logfile, ctime=ctime) as ntlog:
             ntlog.write('Hey now!')
-        with NTlog('test.log.nt', ctime=ctime) as ntlog:
+        with NTlog(running_logfile, ctime=ctime) as ntlog:
             ntlog.write('Hey there!')
     assert isinstance(exception.value, Error)
     assert str(exception.value) == f"{now!s}: attempt to overwrite log entry."
     assert exception.value.args == ('attempt to overwrite log entry.',)
 
     # attempt to read a running log file with a bogus datestamp
-    Path('test.log.nt').write_text("not a date: contents")
+    running_logfile.write_text("not a date: contents")
     with pytest.raises(NTlogError) as exception:
-        with NTlog('test.log.nt', ctime=ctime) as ntlog:
+        with NTlog(running_logfile, ctime=ctime):
             pass
     expected = "Expected an ISO 8601-like string, but was given 'not a date'."
     assert isinstance(exception.value, Error)
@@ -159,14 +158,18 @@ def test_exceptions():
     assert exception.value.args == (expected,)
 
     # attempt to read a running log file that is not valid NestedText
-    Path('test.log.nt').write_text("not valid NestedText")
+    running_logfile.write_text("not valid NestedText")
     with pytest.raises(NTlogError) as exception:
         with NTlog('test.log.nt', ctime=ctime) as ntlog:
             pass
     expected = "unrecognized line."
     assert isinstance(exception.value, Error)
     assert isinstance(exception.value, nt.NestedTextError)
-    assert str(exception.value) == f"test.log.nt, 1: {expected}"
+    assert str(exception.value) == dedent(f"""
+        test.log.nt, 1: {expected}
+               1 ❬not valid NestedText❭
+                  ▲
+    """, strip_nl='b')
     assert exception.value.args == ()
     assert exception.value.kwargs == dict(
         codicil = ("   1 ❬not valid NestedText❭\n      ▲",),

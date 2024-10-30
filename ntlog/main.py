@@ -16,6 +16,7 @@ Options:
     -H, --hour <fmt>          add hour headers
     -E, --entry <fmt>         add entry headers
     -d, --description <text>  description for entry header for new log entry
+    -e, --editor <editor>     add editor mode line, choose from: {editors}
     --fold-marker <mapping>   map fold markers contained in logfile
 
 Copies <logfile> into <logfile>.nt while deleting any log entries that are older 
@@ -40,13 +41,14 @@ def to_int(number):
             if number > 0:
                 return number
             fatal('expected strictly positive number.', culprit=number)
-    except ValueError as e:
+    except ValueError:
         fatal('could not convert to number.', culprit=number)
 
 # MAIN {{{1
 def main():
     # Command line {{{2
-    cmdline = docopt(__doc__)
+    editors = ', '.join(NTlog.MODE_LINES)
+    cmdline = docopt(__doc__.format(editors=editors), version=__version__)
     input_logfile = Path(cmdline['<logfile>'])
     output_logfile = input_logfile.with_suffix('.log.nt')
     keep_for = cmdline['--keep-for']
@@ -77,7 +79,8 @@ def main():
             hour_header = cmdline['--hour'],
             entry_header = cmdline['--entry'],
             fold_marker_mapping = fold_marker_mapping,
-            description = cmdline['--description']
+            description = cmdline['--description'],
+            editor = cmdline['--editor'],
         ) as ntlog:
             log = input_logfile.read_text()
             ntlog.write(log)

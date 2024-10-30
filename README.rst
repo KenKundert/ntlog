@@ -56,6 +56,7 @@ will not be overwritten.
         -E, --entry <fmt>         add entry headers
         -d, --description <text>  add entry headers
         --fold-marker <mapping>   map fold markers contained in logfile
+        -e, --editor <editor>     add editor mode line, choose from: vim
 
 When run, *ntLog* copies the contents of ``<logfile>`` into ``<logfile>.nt``.
 
@@ -256,6 +257,10 @@ Latest Development Version
 """"""""""""""""""""""""""
 | Version: 0.4
 | Released: 2024-01-29
+
+0.5 (2024-10-30)
+""""""""""""""""
+- Add Vim mode line (--editor option).
 
 0.4 (2024-01-29)
 """"""""""""""""
