@@ -258,6 +258,10 @@ Latest Development Version
 | Version: 0.5
 | Released: 2024-10-30
 
+1.0 (2024-12-14)
+""""""""""""""""
+- First production release
+
 0.5 (2024-10-30)
 """"""""""""""""
 - Add Vim mode line (--editor option).

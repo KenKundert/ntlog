@@ -221,6 +221,11 @@ class NTlog:
             # thus, if description contains a horizontal rule, replace it with
             # em dash to avoid confusion
 
+        if max_entries:
+            max_entries = int(max_entries)
+        if min_entries:
+            min_entries = int(min_entries)
+
         self.mode_line = None
         if editor:
             try:
