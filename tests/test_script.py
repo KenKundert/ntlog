@@ -132,7 +132,7 @@ def test_exceptions():
     assert ntlog.stderr == f'ntlog error: {ctime!s}: attempt to overwrite log entry.\n'
 
     # attempt to read a running log file with a bogus datestamp
-    path = running_logfile.write_text("not a date: contents")
+    running_logfile.write_text("not a date: contents")
     ntlog = Run(['ntlog', 'test.log'], 'sOEW1')
     assert ntlog.status == 1
     assert "Expected an ISO 8601-like string, but was given 'not a date'." in ntlog.stderr
