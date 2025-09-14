@@ -10,7 +10,7 @@ at NestedText file where the creation time is used as the key for the entries.
 """
 
 # MIT LICENSE {{{1
-# Copyright (c) 2020-2024 Ken Kundert
+# Copyright (c) 2020-2025 Kenneth S. Kundert
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
