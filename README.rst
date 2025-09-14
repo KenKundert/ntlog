@@ -258,6 +258,10 @@ Latest Development Version
 | Version: 1.0
 | Released: 2024-12-14
 
+1.1 (2025-09-14)
+""""""""""""""""
+- Change to MIT license
+
 1.0 (2024-12-14)
 """"""""""""""""
 - First production release
