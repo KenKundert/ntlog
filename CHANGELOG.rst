@@ -5,8 +5,8 @@ Change Log
 Latest development version
 --------------------------
 
-| Version: 1.0
-| Released: 2024-12-14
+| Version: 1.1
+| Released: 2025-09-14
 
 
 v0.2 (2023-04-10)

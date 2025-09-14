@@ -17,8 +17,8 @@ ntLog — a NestedText logfile aggregation utility
     :target: https://pypi.python.org/pypi/ntlog/
 
 :Author: Ken Kundert
-:Version: 1.0
-:Released: 2024-12-14
+:Version: 1.1
+:Released: 2025-09-14
 
 
 Command-Line Application
@@ -255,8 +255,8 @@ Releases
 
 Latest Development Version
 """"""""""""""""""""""""""
-| Version: 1.0
-| Released: 2024-12-14
+| Version: 1.1
+| Released: 2025-09-14
 
 1.1 (2025-09-14)
 """"""""""""""""
