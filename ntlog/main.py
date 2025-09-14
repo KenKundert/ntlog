@@ -22,15 +22,13 @@ Options:
 Copies <logfile> into <logfile>.nt while deleting any log entries that are older 
 than the limit specified by --keep-for.
 """
-__version__ = '1.0'
-__released__ = '2024-12-14'
 
 
 # IMPORTS {{{1
 from docopt import docopt
 from inform import Error, fatal, full_stop, os_error
 from pathlib import Path
-from . import NTlog
+from . import NTlog, __version__
 
 # UTILITIES {{{1
 # to_int() {{{2
